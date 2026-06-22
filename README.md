@@ -9,13 +9,13 @@ This repository provides a hands-on demonstration and load testing lab comparing
 ```mermaid
 graph TD
     subgraph "Direct Ingestion (High Contention)"
-        A["direct_insert_stress.py (200 Threads)"] -->|Concurrent Inserts| B[("MySQL Database (port 3307)")]
+        A["direct_insert_stress.py (200 Threads)"] -->|Concurrent Inserts| B[("MySQL Database - Port 3307")]
     end
 
     subgraph "Kafka Pipeline (Decoupled & Resilient)"
-        C["kafka_producer.py"] -->|Asynchronous Send| D["Kafka Topic (port 9092)"]
-        D -->|Poll & Batch (50 rows/sec)| E["kafka_consumer.py"]
-        E -->|Controlled Batch Write| F[("MySQL Database (port 3307)")]
+        C["kafka_producer.py"] -->|Asynchronous Send| D["Kafka Topic - Port 9092"]
+        D -->|Poll and Batch - 50 rows/sec| E["kafka_consumer.py"]
+        E -->|Controlled Batch Write| F[("MySQL Database - Port 3307")]
     end
     
     style B fill:#ffebee,stroke:#c62828,stroke-width:2px
