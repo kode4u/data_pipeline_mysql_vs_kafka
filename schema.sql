@@ -1,0 +1,7 @@
+CREATE TABLE IF NOT EXISTS sensor_readings (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    sensor_id VARCHAR(50) NOT NULL,
+    temperature DOUBLE NOT NULL,
+    humidity DOUBLE NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
