@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  airflow-postgres:
+    image: postgres:13
+    container_name: pipeline-airflow-postgres
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    volumes:
+      - airflow-db-data:/var/lib/postgresql/data
+    restart: always
+
+  airflow-webserver:
+    image: apache/airflow:2.7.1-python3.10
+    container_name: pipeline-airflow-webserver
+    depends_on:
+      - airflow-postgres
+      - mysql
+    environment:
+      LOAD_EX: "false"
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow-postgres/airflow
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      # Automatically install mysql-connector-python inside the container on startup
+      _PIP_ADDITIONAL_REQUIREMENTS: "mysql-connector-python>=8.0.0"
+    volumes:
+      - ./data_etl/dags:/opt/airflow/dags
+      - ./data_etl/scripts:/opt/airflow/scripts
+      - ./data_etl/sql:/opt/airflow/sql
+    ports:
+      - "8080:8080"
+    command: bash -c "airflow db migrate && airflow users create --username admin --firstname Admin --lastname Admin --role Admin --email admin@example.com --password admin && airflow webserver"
+    restart: always
+
+  airflow-scheduler:
+    image: apache/airflow:2.7.1-python3.10
+    container_name: pipeline-airflow-scheduler
+    depends_on:
+      - airflow-postgres
+      - mysql
+    environment:
+      LOAD_EX: "false"
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow-postgres/airflow
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      _PIP_ADDITIONAL_REQUIREMENTS: "mysql-connector-python>=8.0.0"
+    volumes:
+      - ./data_etl/dags:/opt/airflow/dags
+      - ./data_etl/scripts:/opt/airflow/scripts
+      - ./data_etl/sql:/opt/airflow/sql
+    command: scheduler
+    restart: always
+
+volumes:
+  airflow-db-data:
